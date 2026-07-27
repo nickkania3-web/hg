@@ -1,15 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import TeamMultiSelect from "@/components/TeamMultiSelect";
 import { getDeviceId } from "@/lib/deviceId";
-import type { ProfileDTO } from "@/lib/types";
+import type { ProfileDTO, TeamDTO } from "@/lib/types";
 
 const DEFAULT_CITY = "Chicago";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<ProfileDTO | null>(null);
+  const [teams, setTeams] = useState<TeamDTO[]>([]);
+  const [selectedTeamIds, setSelectedTeamIds] = useState<Set<string>>(new Set());
+
+  const loadProfile = useCallback(async () => {
+    const deviceId = getDeviceId();
+    const res = await fetch(`/api/profile?deviceId=${encodeURIComponent(deviceId)}`);
+    const data: ProfileDTO = await res.json();
+    setProfile(data);
+    setSelectedTeamIds(new Set(data.teams.map((t) => t.id)));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/teams")
+      .then((res) => res.json())
+      .then(setTeams)
+      .catch(() => setTeams([]));
+  }, []);
 
   useEffect(() => {
     let ignore = false;
@@ -18,13 +36,34 @@ export default function ProfilePage() {
     fetch(`/api/profile?deviceId=${encodeURIComponent(deviceId)}`)
       .then((res) => res.json())
       .then((data: ProfileDTO) => {
-        if (!ignore) setProfile(data);
+        if (ignore) return;
+        setProfile(data);
+        setSelectedTeamIds(new Set(data.teams.map((t) => t.id)));
       });
 
     return () => {
       ignore = true;
     };
   }, []);
+
+  async function toggleTeam(teamId: string) {
+    const deviceId = getDeviceId();
+    const isSelected = selectedTeamIds.has(teamId);
+    setSelectedTeamIds((prev) => {
+      const next = new Set(prev);
+      if (isSelected) next.delete(teamId);
+      else next.add(teamId);
+      return next;
+    });
+    await fetch("/api/follows", {
+      method: isSelected ? "DELETE" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ deviceId, teamId }),
+    });
+    // Refresh "My Teams" chips + stats, which are derived from the full
+    // profile fetch rather than the optimistic Set above.
+    await loadProfile();
+  }
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50">
@@ -58,6 +97,28 @@ export default function ProfilePage() {
         ) : (
           <div className="flex flex-col gap-8">
             <StatsSection profile={profile} />
+
+            <section>
+              <h2 className="text-lg font-semibold text-zinc-900">
+                Choose My Team
+              </h2>
+              <p className="mt-1 text-sm text-zinc-500">
+                Pick any number of teams — the main page ranks bars for
+                whatever you select here.
+              </p>
+              <div className="mt-3">
+                {teams.length === 0 ? (
+                  <p className="text-sm text-zinc-500">Loading teams...</p>
+                ) : (
+                  <TeamMultiSelect
+                    teams={teams}
+                    selectedTeamIds={selectedTeamIds}
+                    onToggle={toggleTeam}
+                  />
+                )}
+              </div>
+            </section>
+
             <TeamsSection teams={profile.teams} />
             <FavoritesSection favorites={profile.favoriteBars} />
             <VisitedSection visited={profile.visited} />
@@ -113,8 +174,7 @@ function TeamsSection({ teams }: { teams: ProfileDTO["teams"] }) {
       <h2 className="text-lg font-semibold text-zinc-900">My Teams</h2>
       {teams.length === 0 ? (
         <p className="mt-2 text-sm text-zinc-500">
-          You&apos;re not following any teams yet. Follow a team from its
-          search page to see it here.
+          You&apos;re not following any teams yet. Pick some above.
         </p>
       ) : (
         <div className="mt-3 flex flex-wrap gap-2">

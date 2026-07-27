@@ -98,3 +98,30 @@ export interface FeedPageDTO {
   entries: FeedEntryDTO[];
   nextCursor: string | null;
 }
+
+export type FeaturedListKey =
+  | "basketball-presence"
+  | "popular-bars"
+  | "most-followed-teams"
+  | "trending-bars"
+  | "busiest-watch-parties";
+
+export interface FeaturedListItemDTO {
+  id: string;
+  primaryText: string;
+  secondaryText: string;
+  count: number;
+}
+
+export interface FeaturedListSummaryDTO {
+  key: FeaturedListKey;
+  title: string;
+  previewItems: FeaturedListItemDTO[];
+  totalCount: number;
+}
+
+export interface FeaturedListDetailDTO {
+  key: FeaturedListKey;
+  title: string;
+  items: FeaturedListItemDTO[];
+}

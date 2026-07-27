@@ -4,14 +4,20 @@ import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import Logo from "@/components/Logo";
-import TeamMultiSelect from "@/components/TeamMultiSelect";
 import SelectedTeamsStrip from "@/components/SelectedTeamsStrip";
 import BarList from "@/components/BarList";
 import VerifyForm from "@/components/VerifyForm";
 import WatchPartyModal from "@/components/WatchPartyModal";
+import FeaturedListCard from "@/components/FeaturedListCard";
+import FeaturedListModal from "@/components/FeaturedListModal";
 import type { BarCardEntry } from "@/components/BarCard";
 import { getDeviceId } from "@/lib/deviceId";
-import type { TeamBarEntryDTO, TeamDTO } from "@/lib/types";
+import type {
+  FeaturedListKey,
+  FeaturedListSummaryDTO,
+  TeamBarEntryDTO,
+  TeamDTO,
+} from "@/lib/types";
 
 const MapView = dynamic(() => import("@/components/MapView"), {
   ssr: false,
@@ -31,6 +37,10 @@ export default function Home() {
   const [verifyingEntry, setVerifyingEntry] = useState<BarCardEntry | null>(null);
   const [watchPartyEntry, setWatchPartyEntry] = useState<BarCardEntry | null>(null);
   const [favoritedBarIds, setFavoritedBarIds] = useState<Set<string>>(new Set());
+  const [featuredLists, setFeaturedLists] = useState<FeaturedListSummaryDTO[] | null>(
+    null
+  );
+  const [openListKey, setOpenListKey] = useState<FeaturedListKey | null>(null);
 
   const teamIdsKey = Array.from(selectedTeamIds).sort().join(",");
   const barsUrl =
@@ -91,21 +101,17 @@ export default function Home() {
     };
   }, [barsUrl]);
 
-  async function toggleTeam(teamId: string) {
-    const deviceId = getDeviceId();
-    const isSelected = selectedTeamIds.has(teamId);
-    setSelectedTeamIds((prev) => {
-      const next = new Set(prev);
-      if (isSelected) next.delete(teamId);
-      else next.add(teamId);
-      return next;
-    });
-    await fetch("/api/follows", {
-      method: isSelected ? "DELETE" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deviceId, teamId }),
-    });
-  }
+  useEffect(() => {
+    let ignore = false;
+    fetch(`/api/featured-lists?city=${encodeURIComponent(city)}`)
+      .then((res) => res.json())
+      .then((data: FeaturedListSummaryDTO[]) => {
+        if (!ignore) setFeaturedLists(data);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [city]);
 
   async function toggleFavorite(barId: string) {
     const deviceId = getDeviceId();
@@ -148,35 +154,43 @@ export default function Home() {
       </header>
 
       <div className="mx-auto w-full max-w-6xl flex-1 px-6 py-6">
-        <div className="mb-6 rounded-2xl border border-zinc-200 bg-white p-5">
-          <div className="flex flex-wrap items-start justify-between gap-6">
-            <div className="min-w-0 flex-1">
-              <h2 className="mb-3 text-sm font-semibold text-zinc-900">
-                Choose My Team
-              </h2>
-              <TeamMultiSelect
-                teams={teams}
-                selectedTeamIds={selectedTeamIds}
-                onToggle={toggleTeam}
-              />
-            </div>
-            <label className="flex items-center gap-2 text-sm text-zinc-600">
-              City
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Chicago"
-                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
-              />
-            </label>
-          </div>
+        <div className="mb-6 flex items-center justify-end">
+          <label className="flex items-center gap-2 text-sm text-zinc-600">
+            City
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Chicago"
+              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500"
+            />
+          </label>
         </div>
 
+        {featuredLists && featuredLists.length > 0 && (
+          <section className="mb-6">
+            <h2 className="mb-3 text-sm font-semibold text-zinc-900">
+              Featured Lists — {city}
+            </h2>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredLists.map((list) => (
+                <FeaturedListCard
+                  key={list.key}
+                  list={list}
+                  onClick={() => setOpenListKey(list.key)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
         {selectedTeamIds.size === 0 ? (
-          <div className="rounded-xl border border-dashed border-zinc-300 p-8 text-center text-zinc-500">
-            Choose at least one team above to see where its fans watch the
-            game.
+          <div className="mb-6 rounded-xl border border-dashed border-zinc-300 p-8 text-center text-zinc-500">
+            Choose your teams in{" "}
+            <Link href="/profile" className="font-medium text-brand hover:underline">
+              your profile
+            </Link>{" "}
+            to see where their fans watch the game.
           </div>
         ) : (
           <div className="flex flex-col gap-6 lg:flex-row">
@@ -229,6 +243,14 @@ export default function Home() {
           barName={watchPartyEntry.name}
           onClose={() => setWatchPartyEntry(null)}
           onChanged={loadEntries}
+        />
+      )}
+
+      {openListKey && (
+        <FeaturedListModal
+          listKey={openListKey}
+          city={city}
+          onClose={() => setOpenListKey(null)}
         />
       )}
     </div>
