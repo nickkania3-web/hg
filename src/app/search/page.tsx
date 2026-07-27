@@ -10,7 +10,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   if (!teamId || !city) {
     return (
-      <div className="flex flex-1 items-center justify-center p-8 text-center text-zinc-500">
+      <div className="flex flex-1 items-center justify-center bg-zinc-50 p-8 text-center text-zinc-500">
         Missing team or city.{" "}
         <Link href="/" className="underline">
           Start a new search

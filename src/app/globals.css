@@ -16,12 +16,10 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* No dark theme yet — every page/component is styled for a light background
+   (zinc-50/white surfaces, dark text), so we deliberately don't follow
+   prefers-color-scheme here. Flipping --background to near-black based on OS
+   theme without a matching dark palette elsewhere just breaks the UI. */
 
 body {
   background: var(--background);

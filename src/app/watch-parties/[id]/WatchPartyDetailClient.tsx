@@ -66,7 +66,7 @@ export default function WatchPartyDetailClient({ id }: WatchPartyDetailClientPro
 
   if (notFound) {
     return (
-      <div className="flex flex-1 items-center justify-center p-8 text-center text-zinc-500">
+      <div className="flex flex-1 items-center justify-center bg-zinc-50 p-8 text-center text-zinc-500">
         Watch party not found.{" "}
         <Link href="/watch-parties" className="underline">
           Back to watch parties
