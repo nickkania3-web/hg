@@ -62,3 +62,47 @@ export interface ProfileDTO {
   visited: VisitedTeamGroupDTO[];
   stats: ProfileStatsDTO;
 }
+
+export interface BarDirectoryItemDTO {
+  id: string;
+  name: string;
+  address: string;
+}
+
+export interface WatchPartyListItemDTO {
+  id: string;
+  teamName: string;
+  sport: string;
+  barName: string;
+  city: string;
+  dateTime: string;
+  rsvpCount: number;
+  isPast: boolean;
+}
+
+export interface AttendeeDTO {
+  fanId: string;
+  name: string;
+  isHost: boolean;
+}
+
+export interface WatchPartyDetailDTO {
+  id: string;
+  teamId: string;
+  teamName: string;
+  sport: string;
+  barId: string;
+  barName: string;
+  barAddress: string;
+  city: string;
+  dateTime: string;
+  note: string | null;
+  hostName: string;
+  isPast: boolean;
+  rsvpCount: number;
+  isRsvpd: boolean;
+  isHostedBySelf: boolean;
+  // Populated when rsvpCount is small enough to list by name; otherwise empty
+  // and the UI falls back to showing just rsvpCount.
+  attendees: AttendeeDTO[];
+}

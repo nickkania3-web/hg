@@ -248,6 +248,101 @@ const sampleNotes = [
   null,
 ];
 
+interface WatchPartySeed {
+  teamName: string;
+  sport: string;
+  barKey: string;
+  daysOffset: number; // negative = past, positive = future
+  hour: number;
+  note: string | null;
+  hostFanIndex: number;
+  rsvpFanIndices: number[]; // additional attendees beyond the host (who auto-RSVPs)
+}
+
+const watchParties: WatchPartySeed[] = [
+  // Upcoming
+  {
+    teamName: "Michigan State Spartans",
+    sport: "Football",
+    barKey: "kirkwood",
+    daysOffset: 3,
+    hour: 15,
+    note: "vs Michigan, watching in the back room",
+    hostFanIndex: 0,
+    rsvpFanIndices: [1, 2, 3, 4, 5, 6, 7],
+  },
+  {
+    teamName: "Notre Dame Fighting Irish",
+    sport: "Football",
+    barKey: "irishoak",
+    daysOffset: 6,
+    hour: 19,
+    note: "Primetime game, arrive early for seats",
+    hostFanIndex: 2,
+    rsvpFanIndices: [3, 4],
+  },
+  {
+    teamName: "Chicago Bulls",
+    sport: "Basketball",
+    barKey: "emeraldloop",
+    daysOffset: 10,
+    hour: 18,
+    note: null,
+    hostFanIndex: 5,
+    rsvpFanIndices: [],
+  },
+  {
+    // Deliberately > 20 attendees to exercise the "show count, not names" path
+    teamName: "Green Bay Packers",
+    sport: "Football",
+    barKey: "bernies",
+    daysOffset: 1,
+    hour: 12,
+    note: "Sunday early game, doors open at 11",
+    hostFanIndex: 20,
+    rsvpFanIndices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+  },
+
+  // Past
+  {
+    teamName: "Michigan Wolverines",
+    sport: "Football",
+    barKey: "fatpour",
+    daysOffset: -5,
+    hour: 15,
+    note: "vs Wisconsin",
+    hostFanIndex: 3,
+    rsvpFanIndices: [0, 1, 2],
+  },
+  {
+    teamName: "Duke Blue Devils",
+    sport: "Basketball",
+    barKey: "lodge",
+    daysOffset: -10,
+    hour: 20,
+    note: null,
+    hostFanIndex: 6,
+    rsvpFanIndices: [7, 8],
+  },
+  {
+    teamName: "Wisconsin Badgers",
+    sport: "Football",
+    barKey: "globe",
+    daysOffset: -20,
+    hour: 12,
+    note: "Rivalry week watch party",
+    hostFanIndex: 1,
+    rsvpFanIndices: [0, 2, 3, 4],
+  },
+];
+
+function offsetDate(daysOffset: number, hour: number): Date {
+  const d = new Date();
+  d.setDate(d.getDate() + daysOffset);
+  d.setHours(hour, 0, 0, 0);
+  return d;
+}
+
 function randomPastDate(maxDaysAgo: number): Date {
   const daysAgo = Math.floor(Math.random() * maxDaysAgo);
   const d = new Date();
@@ -261,6 +356,8 @@ async function main() {
   await prisma.verification.deleteMany();
   await prisma.fanTeamFollow.deleteMany();
   await prisma.fanBarFavorite.deleteMany();
+  await prisma.rSVP.deleteMany();
+  await prisma.watchParty.deleteMany();
   await prisma.teamBarLink.deleteMany();
   await prisma.fan.deleteMany();
   await prisma.bar.deleteMany();
@@ -316,6 +413,36 @@ async function main() {
           note,
           createdAt: randomPastDate(60),
         },
+      });
+    }
+  }
+
+  console.log("Seeding watch parties + RSVPs...");
+  for (const wp of watchParties) {
+    const teamId = teamRecords.get(`${wp.teamName}::${wp.sport}`);
+    const barId = barRecords.get(wp.barKey);
+    if (!teamId || !barId) {
+      throw new Error(
+        `Missing reference for watch party ${wp.teamName}/${wp.sport}/${wp.barKey}`
+      );
+    }
+
+    const host = fans[wp.hostFanIndex];
+    const party = await prisma.watchParty.create({
+      data: {
+        teamId,
+        barId,
+        city: CITY,
+        dateTime: offsetDate(wp.daysOffset, wp.hour),
+        note: wp.note,
+        createdByFanId: host.id,
+      },
+    });
+
+    const attendeeIndices = new Set([wp.hostFanIndex, ...wp.rsvpFanIndices]);
+    for (const idx of attendeeIndices) {
+      await prisma.rSVP.create({
+        data: { fanId: fans[idx].id, watchPartyId: party.id },
       });
     }
   }

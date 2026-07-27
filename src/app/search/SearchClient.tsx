@@ -131,6 +131,12 @@ export default function SearchClient({ teamId, city }: SearchClientProps) {
             >
               My Profile
             </Link>
+            <Link
+              href="/watch-parties"
+              className="text-sm text-zinc-500 hover:text-zinc-700"
+            >
+              Watch Parties
+            </Link>
           </div>
         </div>
       </header>

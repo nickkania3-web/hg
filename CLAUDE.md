@@ -56,6 +56,7 @@ Fan-owned join tables, all keyed off `Fan.id`:
 - `FanTeamFollow` — teams a fan follows ("My Teams" on the profile page)
 - `FanBarFavorite` — bars a fan has starred, independent of verification history
 - `Verification` — a check-in (fan + team + bar + timestamp); rolls up into `TeamBarLink.verificationCount` and is also the raw source for "visited bars" on the profile
+- `WatchParty` (team + bar + city + `dateTime` + note + `createdByFanId`) / `RSVP` (fan + watchParty) — fan-hosted watch parties, independent of `Verification` (no auto-verify when a party happens). "Upcoming" vs. "Past" is computed from `dateTime` vs. `now()` at query time, never stored. Unlike `TeamBarLink`, RSVP counts are **not** denormalized — they're small enough that a plain `_count`/`.count()` per request is fine; don't add a rollup column here without a real reason. Note the generated Prisma Client property for the `RSVP` model is `prisma.rSVP` (only the leading character gets lowercased), not `prisma.rsvp`.
 
 Verification writes are rate-limited per `(fan, team, bar)` to one per rolling 12h window (see the spam-guard check in `src/app/api/verifications/route.ts`) — this is enforced in the route, not the database.
 
@@ -67,8 +68,8 @@ API routes (`src/app/api/*/route.ts`) are intentionally thin: validate input, ca
 
 Pages mix server and client components depending on whether they need `deviceId` (which only exists in `localStorage`, so anything fan-scoped must be client-rendered):
 - `/` (landing), `/admin` — straightforward
-- `/search` — `page.tsx` is a server component that `await`s `searchParams` (Next 16: `params`/`searchParams` are Promises) and passes plain props into `SearchClient.tsx`, a client component that does the actual fetching/state
-- `/profile` — fully client-rendered (`"use client"` page), since everything on it is keyed by the browser's `deviceId`
+- `/search`, `/watch-parties/[id]` — `page.tsx` is a server component that `await`s `params`/`searchParams` (Next 16: both are Promises) and passes plain props into a co-located client component (`SearchClient.tsx`, `WatchPartyDetailClient.tsx`) that does the actual fetching/state — the established pattern for any route that needs a dynamic segment or query param *and* `deviceId`
+- `/profile`, `/watch-parties` — fully client-rendered (`"use client"` page, no server shell needed), since everything on them is keyed by the browser's `deviceId` and there's no route param to resolve server-side
 
 When adding a data-fetch-on-mount `useEffect`, inline the `fetch(...).then(...)` chain directly in the effect body rather than calling a separately-defined async helper function — the project's eslint config (`react-hooks/set-state-in-effect`) flags indirect calls to a function that sets state, even when that function is genuinely async-safe. `loadBars` in `SearchClient.tsx` is the reference pattern: an inline effect for the initial/reactive load, plus a separately-defined async function only for imperative reloads triggered from event handlers (which the rule doesn't flag).
 
@@ -76,4 +77,8 @@ When stacking a modal/overlay over the Leaflet map, give the map's wrapper `isol
 
 ### Seed data
 
-`prisma/seed.ts` clears and repopulates: 9 teams (football + basketball; NCAA/NFL/NBA) and 18 real Chicago bar venues (fabricated team associations/counts), wired through `TeamBarLink` with a deliberately varied spread of verification counts so all three ranking tiers are represented, plus a batch of seeded `Fan`/`Verification` rows. Team and bar IDs are Prisma-generated `cuid()`s that change on every reseed — don't hardcode them anywhere outside ad hoc test scripts.
+`prisma/seed.ts` clears and repopulates: 9 teams (football + basketball; NCAA/NFL/NBA) and 18 real Chicago bar venues (fabricated team associations/counts), wired through `TeamBarLink` with a deliberately varied spread of verification counts so all three ranking tiers are represented, plus a batch of seeded `Fan`/`Verification` rows, and 7 `WatchParty` rows (4 upcoming, 3 past) with `RSVP`s — one deliberately has 21 RSVPs to exercise the "show count, not attendee names" fallback (see below). Team and bar IDs are Prisma-generated `cuid()`s that change on every reseed — don't hardcode them anywhere outside ad hoc test scripts.
+
+### Watch parties — attendee list vs. count
+
+`GET /api/watch-parties/[id]` returns full attendee names only when `rsvpCount <= 20` (constant `ATTENDEE_LIST_THRESHOLD` in that route); above that it returns an empty `attendees` array and the UI falls back to showing just the count. This mirrors the ranking-tier-threshold pattern — tunable, not load-bearing logic. Hosting a party auto-creates an RSVP for the host. `WatchParty.city` is copied from the selected `Bar.city` at creation time, not typed by the host — keep it that way rather than letting it drift from the bar's actual city.

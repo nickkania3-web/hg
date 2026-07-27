@@ -35,6 +35,12 @@ export default function ProfilePage() {
             </Link>
             <h1 className="text-xl font-bold text-zinc-900">My Profile</h1>
           </div>
+          <Link
+            href="/watch-parties"
+            className="text-sm text-zinc-500 hover:text-zinc-700"
+          >
+            Watch Parties
+          </Link>
         </div>
       </header>
 

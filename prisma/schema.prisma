@@ -17,6 +17,7 @@ model Team {
   barLinks      TeamBarLink[]
   verifications Verification[]
   followedBy    FanTeamFollow[]
+  watchParties  WatchParty[]
 
   @@unique([name, sport])
 }
@@ -36,6 +37,7 @@ model Bar {
   barLinks      TeamBarLink[]
   verifications Verification[]
   favoritedBy   FanBarFavorite[]
+  watchParties  WatchParty[]
 
   @@index([city])
 }
@@ -77,9 +79,11 @@ model Fan {
   displayName String?
   createdAt   DateTime @default(now())
 
-  verifications Verification[]
-  teamFollows   FanTeamFollow[]
-  barFavorites  FanBarFavorite[]
+  verifications      Verification[]
+  teamFollows        FanTeamFollow[]
+  barFavorites       FanBarFavorite[]
+  hostedWatchParties WatchParty[]    @relation("HostedWatchParties")
+  rsvps              RSVP[]
 }
 
 // A fan following a team ("my teams")
@@ -106,4 +110,38 @@ model FanBarFavorite {
   bar Bar @relation(fields: [barId], references: [id])
 
   @@unique([fanId, barId])
+}
+
+// A fan-hosted watch party for a team+bar+date/time. "Upcoming" vs "Past" is
+// computed from dateTime at query time, not stored.
+model WatchParty {
+  id             String   @id @default(cuid())
+  teamId         String
+  barId          String
+  city           String
+  dateTime       DateTime
+  note           String?
+  createdByFanId String
+  createdAt      DateTime @default(now())
+
+  team      Team   @relation(fields: [teamId], references: [id])
+  bar       Bar    @relation(fields: [barId], references: [id])
+  createdBy Fan    @relation("HostedWatchParties", fields: [createdByFanId], references: [id])
+  rsvps     RSVP[]
+
+  @@index([city, dateTime])
+  @@index([teamId])
+}
+
+// A fan's RSVP to a watch party
+model RSVP {
+  id           String   @id @default(cuid())
+  fanId        String
+  watchPartyId String
+  createdAt    DateTime @default(now())
+
+  fan        Fan        @relation(fields: [fanId], references: [id])
+  watchParty WatchParty @relation(fields: [watchPartyId], references: [id])
+
+  @@unique([fanId, watchPartyId])
 }

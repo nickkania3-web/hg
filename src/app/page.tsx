@@ -62,9 +62,12 @@ export default function Home() {
           Seeded for Chicago — try Michigan State, Notre Dame, or the Packers.
         </p>
 
-        <p className="mt-2 text-center text-sm">
+        <p className="mt-2 flex justify-center gap-4 text-center text-sm">
           <Link href="/profile" className="text-zinc-500 hover:text-zinc-700">
             My Profile
+          </Link>
+          <Link href="/watch-parties" className="text-zinc-500 hover:text-zinc-700">
+            Watch Parties
           </Link>
         </p>
       </div>
