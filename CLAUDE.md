@@ -71,9 +71,9 @@ Ranking tiers (`src/lib/ranking.ts`, `getTierInfo(verificationCount)`) are the s
 API routes (`src/app/api/*/route.ts`) are intentionally thin: validate input, call Prisma, shape a DTO from `src/lib/types.ts`, return `Response.json(...)`. No service/repository layer — Prisma is called directly from route handlers.
 
 Pages mix server and client components depending on whether they need `deviceId` (which only exists in `localStorage`, so anything fan-scoped must be client-rendered):
-- `/` (landing), `/admin` — straightforward
+- `/admin` — straightforward, no fan-scoped data
 - `/search`, `/watch-parties/[id]` — `page.tsx` is a server component that `await`s `params`/`searchParams` (Next 16: both are Promises) and passes plain props into a co-located client component (`SearchClient.tsx`, `WatchPartyDetailClient.tsx`) that does the actual fetching/state — the established pattern for any route that needs a dynamic segment or query param *and* `deviceId`
-- `/profile`, `/watch-parties` — fully client-rendered (`"use client"` page, no server shell needed), since everything on them is keyed by the browser's `deviceId` and there's no route param to resolve server-side
+- `/` (main page), `/profile`, `/watch-parties`, `/timeline` — fully client-rendered (`"use client"` page, no server shell needed), since everything on them is keyed by the browser's `deviceId` and there's no route param to resolve server-side
 
 When adding a data-fetch-on-mount `useEffect`, inline the `fetch(...).then(...)` chain directly in the effect body rather than calling a separately-defined async helper function — the project's eslint config (`react-hooks/set-state-in-effect`) flags indirect calls to a function that sets state, even when that function is genuinely async-safe. `loadBars` in `SearchClient.tsx` is the reference pattern: an inline effect for the initial/reactive load, plus a separately-defined async function only for imperative reloads triggered from event handlers (which the rule doesn't flag).
 
@@ -94,3 +94,17 @@ When stacking a modal/overlay over the Leaflet map, give the map's wrapper `isol
 The `/timeline` page uses real infinite scroll (`IntersectionObserver` on a sentinel div), not a "Load more" button like the rest of the app. The observer callback (not the `useEffect` body itself) is what calls the paginated fetch — same reasoning as the `set-state-in-effect` note above: the callback fires asynchronously off a browser event, so it's exempt from that lint rule the same way an event handler would be.
 
 Fan display name here reuses the existing nullable `Fan.displayName` with a `"A HomeGame fan"` fallback (same pattern as watch-party attendees) — there is no unique handle system in this schema. One was proposed once for an earlier version of this feature and explicitly backed out; don't reintroduce it without being asked.
+
+### Main page — multi-team selection, and the one-row-per-team-bar gotcha
+
+The main page (`src/app/page.tsx`) lets a fan multi-select any number of teams ("Choose My Team", `TeamMultiSelect`) and shows one aggregate, inline bar list + map filtered to bars linked to *any* selected team — no separate search/submit step. This reuses `FanTeamFollow`/`/api/follows` directly (the exact same persistence `/search`'s single-team `FollowButton` already used) — selecting a team here and following it from `/search` are the same underlying action. `/search?teamId=X` still exists unchanged as a single-team deep-dive (linked from profile team chips); it wasn't replaced, just no longer the main page's primary flow.
+
+The multi-team bars query (`GET /api/bars/for-teams?teamIds=a,b,c&city=`) returns **one row per (team, bar) match**, not one row per bar — a bar linked to two selected teams (common in seed data, e.g. Kirkwood Bar & Grill matches both Michigan State football and the Packers) appears twice, each with its own team-specific tier/count from `TeamBarLink`. There's no cross-team merge/dedup; ranking is inherently team-specific (`TeamBarLink.verificationCount`), so merging would mean inventing a ranking concept the schema doesn't have.
+
+**This means bar `id` is no longer a unique key** wherever a list of these entries is rendered — `BarList`/`MapView` key on `` `${teamId}-${barId}` `` (falling back to plain `barId` when `teamId` isn't present, e.g. on `/search`'s single-team `RankedBarDTO[]`). If you add another place that renders a list of `TeamBarEntryDTO`, key it the same composite way — plain `bar.id` will produce a duplicate-React-key console error that's easy to miss (it doesn't throw, just silently risks React reusing/dropping the wrong DOM node). This exact bug shipped once during development and was only caught by checking the browser console directly, not by type-checking or a visual screenshot.
+
+`BarCard`'s `bar` prop type (`BarCardEntry`, exported from `BarCard.tsx`) is `RankedBarDTO & Partial<Pick<TeamBarEntryDTO, "teamId" | "teamName" | "sport">>` — one type that structurally accepts either a single-team `RankedBarDTO` (no team label rendered) or a multi-team `TeamBarEntryDTO` (team name + sport line rendered above the bar name). `BarCard`'s `onVerify` passes back the whole entry object, not just an id — necessary so the caller knows *which* team's row was clicked when a bar has more than one.
+
+### Team logos
+
+`Team.logoUrl` holds a self-contained `data:image/svg+xml,...` URI (colored circle + initials, generated per team in `prisma/seed.ts`'s `logoDataUri()`) — not a hosted image file. No network fetch, nothing in `/public`. Not official team artwork, deliberately just a placeholder. `TeamLogo.tsx` is the one place that renders it.

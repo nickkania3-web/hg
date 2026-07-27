@@ -3,10 +3,10 @@
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
 import { useEffect } from "react";
 import { getTierInfo } from "@/lib/ranking";
-import type { RankedBarDTO } from "@/lib/types";
+import type { BarCardEntry } from "@/components/BarCard";
 
 interface MapViewProps {
-  bars: RankedBarDTO[];
+  bars: BarCardEntry[];
   selectedBarId: string | null;
   onSelect: (barId: string) => void;
 }
@@ -53,7 +53,7 @@ export default function MapView({ bars, selectedBarId, onSelect }: MapViewProps)
         const isSelected = bar.id === selectedBarId;
         return (
           <CircleMarker
-            key={bar.id}
+            key={bar.teamId ? `${bar.teamId}-${bar.id}` : bar.id}
             center={[bar.lat, bar.lng]}
             radius={isSelected ? 12 : 9}
             pathOptions={{
@@ -67,6 +67,11 @@ export default function MapView({ bars, selectedBarId, onSelect }: MapViewProps)
             <Popup>
               <div className="text-sm">
                 <p className="font-semibold">{bar.name}</p>
+                {bar.teamName && (
+                  <p className="text-zinc-500">
+                    {bar.teamName} · {bar.sport}
+                  </p>
+                )}
                 <p className="text-zinc-500">{tier.label}</p>
                 <p>{bar.verificationCount} verifications</p>
               </div>

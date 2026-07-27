@@ -12,6 +12,7 @@ model Team {
   name      String
   sport     String
   league    String
+  logoUrl   String   @default("")
   createdAt DateTime @default(now())
 
   barLinks      TeamBarLink[]

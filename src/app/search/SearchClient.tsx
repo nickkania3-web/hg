@@ -163,9 +163,7 @@ export default function SearchClient({ teamId, city }: SearchClientProps) {
               selectedBarId={selectedBarId}
               favoritedBarIds={favoritedBarIds}
               onSelect={setSelectedBarId}
-              onVerify={(barId) =>
-                setVerifyingBar(bars.find((b) => b.id === barId) ?? null)
-              }
+              onVerify={setVerifyingBar}
               onToggleFavorite={toggleFavorite}
             />
           )}

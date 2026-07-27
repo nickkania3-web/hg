@@ -1,14 +1,21 @@
 "use client";
 
 import { getTierInfo } from "@/lib/ranking";
-import type { RankedBarDTO } from "@/lib/types";
+import type { RankedBarDTO, TeamBarEntryDTO } from "@/lib/types";
+
+// Accepts either a single-team RankedBarDTO (used by /search) or a
+// multi-team TeamBarEntryDTO (used by the main page) — teamId/teamName are
+// only present in the latter, and drive the optional team label + which
+// team a verification gets attributed to.
+export type BarCardEntry = RankedBarDTO &
+  Partial<Pick<TeamBarEntryDTO, "teamId" | "teamName" | "sport">>;
 
 interface BarCardProps {
-  bar: RankedBarDTO;
+  bar: BarCardEntry;
   isSelected: boolean;
   isFavorited: boolean;
   onSelect: (barId: string) => void;
-  onVerify: (barId: string) => void;
+  onVerify: (bar: BarCardEntry) => void;
   onToggleFavorite: (barId: string) => void;
 }
 
@@ -33,6 +40,11 @@ export default function BarCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div>
+          {bar.teamName && (
+            <p className="text-xs font-medium text-zinc-400">
+              {bar.teamName} · {bar.sport}
+            </p>
+          )}
           <h3 className="font-semibold text-zinc-900">{bar.name}</h3>
           <p className="text-sm text-zinc-500">{bar.address}</p>
         </div>
@@ -73,7 +85,7 @@ export default function BarCard({
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            onVerify(bar.id);
+            onVerify(bar);
           }}
           className="rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-dark"
         >

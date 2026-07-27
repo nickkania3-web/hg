@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
     name: f.team.name,
     sport: f.team.sport,
     league: f.team.league,
+    logoUrl: f.team.logoUrl,
   }));
 
   const favoriteBars = fan.barFavorites.map((f) => ({

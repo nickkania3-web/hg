@@ -11,6 +11,7 @@ export async function GET() {
     name: t.name,
     sport: t.sport,
     league: t.league,
+    logoUrl: t.logoUrl,
   }));
 
   return Response.json(dto);

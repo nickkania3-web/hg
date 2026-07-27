@@ -3,6 +3,7 @@ export interface TeamDTO {
   name: string;
   sport: string;
   league: string;
+  logoUrl: string;
 }
 
 export interface RankedBarDTO {
@@ -16,6 +17,14 @@ export interface RankedBarDTO {
   soundPolicy: string | null;
   capacity: number | null;
   verificationCount: number;
+}
+
+// One (team, bar) match for a multi-team filtered view — a bar linked to
+// several selected teams appears once per team, not merged into one row.
+export interface TeamBarEntryDTO extends RankedBarDTO {
+  teamId: string;
+  teamName: string;
+  sport: string;
 }
 
 export interface AdminSummaryRow {

@@ -4,16 +4,37 @@ const prisma = new PrismaClient();
 
 const CITY = "Chicago";
 
+function initials(name: string): string {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+}
+
+// Simple colored-initials placeholder logo, self-contained (no image hosting
+// or external fetches needed). Not official team artwork.
+function logoDataUri(name: string, color: string): string {
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">` +
+    `<circle cx="20" cy="20" r="20" fill="${color}"/>` +
+    `<text x="20" y="21" font-family="Arial, sans-serif" font-size="15" ` +
+    `font-weight="bold" fill="#ffffff" text-anchor="middle" dominant-baseline="central">` +
+    `${initials(name)}</text></svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
 const teams = [
-  { name: "Michigan State Spartans", sport: "Football", league: "NCAA" },
-  { name: "Michigan Wolverines", sport: "Football", league: "NCAA" },
-  { name: "Wisconsin Badgers", sport: "Football", league: "NCAA" },
-  { name: "Notre Dame Fighting Irish", sport: "Football", league: "NCAA" },
-  { name: "Green Bay Packers", sport: "Football", league: "NFL" },
-  { name: "Chicago Bears", sport: "Football", league: "NFL" },
-  { name: "Michigan State Spartans", sport: "Basketball", league: "NCAA" },
-  { name: "Duke Blue Devils", sport: "Basketball", league: "NCAA" },
-  { name: "Chicago Bulls", sport: "Basketball", league: "NBA" },
+  { name: "Michigan State Spartans", sport: "Football", league: "NCAA", color: "#18453B" },
+  { name: "Michigan Wolverines", sport: "Football", league: "NCAA", color: "#00274C" },
+  { name: "Wisconsin Badgers", sport: "Football", league: "NCAA", color: "#C5050C" },
+  { name: "Notre Dame Fighting Irish", sport: "Football", league: "NCAA", color: "#0C2340" },
+  { name: "Green Bay Packers", sport: "Football", league: "NFL", color: "#203731" },
+  { name: "Chicago Bears", sport: "Football", league: "NFL", color: "#0B162A" },
+  { name: "Michigan State Spartans", sport: "Basketball", league: "NCAA", color: "#18453B" },
+  { name: "Duke Blue Devils", sport: "Basketball", league: "NCAA", color: "#001A57" },
+  { name: "Chicago Bulls", sport: "Basketball", league: "NBA", color: "#CE1141" },
 ] as const;
 
 const bars = [
@@ -377,8 +398,10 @@ async function main() {
 
   console.log("Seeding teams...");
   const teamRecords = new Map<string, string>();
-  for (const t of teams) {
-    const team = await prisma.team.create({ data: t });
+  for (const { color, ...t } of teams) {
+    const team = await prisma.team.create({
+      data: { ...t, logoUrl: logoDataUri(t.name, color) },
+    });
     teamRecords.set(`${t.name}::${t.sport}`, team.id);
   }
 
