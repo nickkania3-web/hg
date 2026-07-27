@@ -1,16 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { randomHandleCandidate } from "../src/lib/handle";
 
 const prisma = new PrismaClient();
-
-function uniqueHandle(taken: Set<string>): string {
-  let candidate = randomHandleCandidate();
-  while (taken.has(candidate)) {
-    candidate = randomHandleCandidate();
-  }
-  taken.add(candidate);
-  return candidate;
-}
 
 const CITY = "Chicago";
 
@@ -271,20 +261,17 @@ async function main() {
   await prisma.verification.deleteMany();
   await prisma.fanTeamFollow.deleteMany();
   await prisma.fanBarFavorite.deleteMany();
-  await prisma.fanFollow.deleteMany();
   await prisma.teamBarLink.deleteMany();
   await prisma.fan.deleteMany();
   await prisma.bar.deleteMany();
   await prisma.team.deleteMany();
 
   console.log("Seeding fans...");
-  const takenHandles = new Set<string>();
   const fans = await Promise.all(
     Array.from({ length: 25 }).map((_, i) =>
       prisma.fan.create({
         data: {
           deviceId: `seed-device-${i + 1}`,
-          handle: uniqueHandle(takenHandles),
           displayName: i % 3 === 0 ? `Fan${i + 1}` : null,
         },
       })

@@ -74,29 +74,12 @@ model Verification {
 model Fan {
   id          String   @id @default(cuid())
   deviceId    String   @unique
-  handle      String   @unique
   displayName String?
   createdAt   DateTime @default(now())
 
   verifications Verification[]
   teamFollows   FanTeamFollow[]
   barFavorites  FanBarFavorite[]
-  following     FanFollow[] @relation("FollowerFan")
-  followers     FanFollow[] @relation("FolloweeFan")
-}
-
-// One-directional fan-to-fan follow (no approval flow)
-model FanFollow {
-  id            String   @id @default(cuid())
-  followerFanId String
-  followeeFanId String
-  createdAt     DateTime @default(now())
-
-  follower Fan @relation("FollowerFan", fields: [followerFanId], references: [id])
-  followee Fan @relation("FolloweeFan", fields: [followeeFanId], references: [id])
-
-  @@unique([followerFanId, followeeFanId])
-  @@index([followeeFanId])
 }
 
 // A fan following a team ("my teams")
