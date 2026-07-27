@@ -74,13 +74,21 @@ export default function WatchPartiesPage() {
               <h1 className="text-xl font-bold text-zinc-900">Watch Parties</h1>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setShowHostForm(true)}
-            className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
-          >
-            Host a watch party
-          </button>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/timeline"
+              className="text-sm text-zinc-500 hover:text-brand"
+            >
+              Timeline
+            </Link>
+            <button
+              type="button"
+              onClick={() => setShowHostForm(true)}
+              className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
+            >
+              Host a watch party
+            </button>
+          </div>
         </div>
       </header>
 

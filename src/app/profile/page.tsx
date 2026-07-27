@@ -41,12 +41,20 @@ export default function ProfilePage() {
               <h1 className="text-xl font-bold text-zinc-900">My Profile</h1>
             </div>
           </div>
-          <Link
-            href="/watch-parties"
-            className="text-sm text-zinc-500 hover:text-brand"
-          >
-            Watch Parties
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/timeline"
+              className="text-sm text-zinc-500 hover:text-brand"
+            >
+              Timeline
+            </Link>
+            <Link
+              href="/watch-parties"
+              className="text-sm text-zinc-500 hover:text-brand"
+            >
+              Watch Parties
+            </Link>
+          </div>
         </div>
       </header>
 

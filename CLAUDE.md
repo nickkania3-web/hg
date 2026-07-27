@@ -86,3 +86,11 @@ When stacking a modal/overlay over the Leaflet map, give the map's wrapper `isol
 ### Watch parties — attendee list vs. count
 
 `GET /api/watch-parties/[id]` returns full attendee names only when `rsvpCount <= 20` (constant `ATTENDEE_LIST_THRESHOLD` in that route); above that it returns an empty `attendees` array and the UI falls back to showing just the count. This mirrors the ranking-tier-threshold pattern — tunable, not load-bearing logic. Hosting a party auto-creates an RSVP for the host. `WatchParty.city` is copied from the selected `Bar.city` at creation time, not typed by the host — keep it that way rather than letting it drift from the bar's actual city.
+
+### Timeline feed — cursor pagination, not offset
+
+`/timeline` (`GET /api/feed`) is a global, unpersonalized activity feed read straight off `Verification` — no new tables. Pagination is cursor-based on `Verification.id` via Prisma's native `cursor`/`skip: 1` (not a `createdAt < x` filter) specifically because `createdAt` values can collide across rows (easy with seeded/bulk data, not impossible with real concurrent check-ins); a timestamp-filter approach can silently skip or duplicate rows on a tie, cursor-on-id can't. `orderBy` is `[{ createdAt: "desc" }, { id: "desc" }]` — Prisma still locates the cursor row correctly by its unique `id` even with the compound sort. The `take: limit + 1` "peek one ahead" is how `nextCursor` gets computed without a separate count query — same pattern to reach for anywhere else that needs cursor pagination.
+
+The `/timeline` page uses real infinite scroll (`IntersectionObserver` on a sentinel div), not a "Load more" button like the rest of the app. The observer callback (not the `useEffect` body itself) is what calls the paginated fetch — same reasoning as the `set-state-in-effect` note above: the callback fires asynchronously off a browser event, so it's exempt from that lint rule the same way an event handler would be.
+
+Fan display name here reuses the existing nullable `Fan.displayName` with a `"A HomeGame fan"` fallback (same pattern as watch-party attendees) — there is no unique handle system in this schema. One was proposed once for an earlier version of this feature and explicitly backed out; don't reintroduce it without being asked.

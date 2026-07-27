@@ -106,3 +106,17 @@ export interface WatchPartyDetailDTO {
   // and the UI falls back to showing just rsvpCount.
   attendees: AttendeeDTO[];
 }
+
+export interface FeedEntryDTO {
+  id: string;
+  name: string;
+  teamName: string;
+  sport: string;
+  barName: string;
+  createdAt: string;
+}
+
+export interface FeedPageDTO {
+  entries: FeedEntryDTO[];
+  nextCursor: string | null;
+}

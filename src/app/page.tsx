@@ -39,6 +39,9 @@ export default function Home() {
             <Logo />
           </Link>
           <div className="flex items-center gap-4 text-sm">
+            <Link href="/timeline" className="text-zinc-500 hover:text-brand">
+              Timeline
+            </Link>
             <Link href="/profile" className="text-zinc-500 hover:text-brand">
               My Profile
             </Link>

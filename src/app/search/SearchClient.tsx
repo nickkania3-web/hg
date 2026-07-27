@@ -132,6 +132,12 @@ export default function SearchClient({ teamId, city }: SearchClientProps) {
           <div className="flex items-center gap-4">
             <FollowButton isFollowing={isFollowing} onToggle={toggleFollow} />
             <Link
+              href="/timeline"
+              className="text-sm text-zinc-500 hover:text-brand"
+            >
+              Timeline
+            </Link>
+            <Link
               href="/profile"
               className="text-sm text-zinc-500 hover:text-brand"
             >
