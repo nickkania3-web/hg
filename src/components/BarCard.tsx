@@ -27,7 +27,7 @@ export default function BarCard({
       onClick={() => onSelect(bar.id)}
       className={`cursor-pointer rounded-xl border bg-white p-4 shadow-sm transition-colors ${
         isSelected
-          ? "border-zinc-900 ring-1 ring-zinc-900"
+          ? "border-brand ring-1 ring-brand"
           : "border-zinc-200 hover:border-zinc-400"
       }`}
     >
@@ -75,7 +75,7 @@ export default function BarCard({
             e.stopPropagation();
             onVerify(bar.id);
           }}
-          className="rounded-lg bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700"
+          className="rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-dark"
         >
           I watched here
         </button>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import RsvpButton from "@/components/RsvpButton";
+import Logo from "@/components/Logo";
 import { formatPartyDateTime } from "@/lib/format";
 import { getDeviceId } from "@/lib/deviceId";
 import type { WatchPartyDetailDTO } from "@/lib/types";
@@ -78,10 +79,13 @@ export default function WatchPartyDetailClient({ id }: WatchPartyDetailClientPro
   return (
     <div className="flex flex-1 flex-col bg-zinc-50">
       <header className="border-b border-zinc-200 bg-white px-6 py-4">
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto flex max-w-2xl items-center gap-4">
+          <Link href="/">
+            <Logo />
+          </Link>
           <Link
             href="/watch-parties"
-            className="text-sm text-zinc-500 hover:text-zinc-700"
+            className="text-sm text-zinc-500 hover:text-brand"
           >
             &larr; Watch Parties
           </Link>

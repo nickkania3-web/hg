@@ -6,6 +6,7 @@ import Link from "next/link";
 import BarList from "@/components/BarList";
 import VerifyForm from "@/components/VerifyForm";
 import FollowButton from "@/components/FollowButton";
+import Logo from "@/components/Logo";
 import { getDeviceId } from "@/lib/deviceId";
 import type { RankedBarDTO, TeamDTO } from "@/lib/types";
 
@@ -115,25 +116,30 @@ export default function SearchClient({ teamId, city }: SearchClientProps) {
     <div className="flex flex-1 flex-col">
       <header className="border-b border-zinc-200 bg-white px-6 py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <div>
-            <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-700">
-              &larr; New search
+          <div className="flex items-center gap-4">
+            <Link href="/">
+              <Logo />
             </Link>
-            <h1 className="text-xl font-bold text-zinc-900">
-              {team ? team.name : "Loading team..."} fans in {city}
-            </h1>
+            <div>
+              <Link href="/" className="text-sm text-zinc-500 hover:text-brand">
+                &larr; New search
+              </Link>
+              <h1 className="text-xl font-bold text-zinc-900">
+                {team ? team.name : "Loading team..."} fans in {city}
+              </h1>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <FollowButton isFollowing={isFollowing} onToggle={toggleFollow} />
             <Link
               href="/profile"
-              className="text-sm text-zinc-500 hover:text-zinc-700"
+              className="text-sm text-zinc-500 hover:text-brand"
             >
               My Profile
             </Link>
             <Link
               href="/watch-parties"
-              className="text-sm text-zinc-500 hover:text-zinc-700"
+              className="text-sm text-zinc-500 hover:text-brand"
             >
               Watch Parties
             </Link>

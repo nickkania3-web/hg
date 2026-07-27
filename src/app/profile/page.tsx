@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Logo from "@/components/Logo";
 import { getDeviceId } from "@/lib/deviceId";
 import type { ProfileDTO } from "@/lib/types";
 
@@ -29,15 +30,20 @@ export default function ProfilePage() {
     <div className="flex flex-1 flex-col bg-zinc-50">
       <header className="border-b border-zinc-200 bg-white px-6 py-4">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <div>
-            <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-700">
-              &larr; Home
+          <div className="flex items-center gap-4">
+            <Link href="/">
+              <Logo />
             </Link>
-            <h1 className="text-xl font-bold text-zinc-900">My Profile</h1>
+            <div>
+              <Link href="/" className="text-sm text-zinc-500 hover:text-brand">
+                &larr; Home
+              </Link>
+              <h1 className="text-xl font-bold text-zinc-900">My Profile</h1>
+            </div>
           </div>
           <Link
             href="/watch-parties"
-            className="text-sm text-zinc-500 hover:text-zinc-700"
+            className="text-sm text-zinc-500 hover:text-brand"
           >
             Watch Parties
           </Link>
@@ -116,7 +122,7 @@ function TeamsSection({ teams }: { teams: ProfileDTO["teams"] }) {
               href={`/search?teamId=${encodeURIComponent(
                 team.id
               )}&city=${encodeURIComponent(DEFAULT_CITY)}`}
-              className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:border-zinc-400"
+              className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:border-brand"
             >
               {team.name}{" "}
               <span className="text-zinc-400">({team.sport})</span>

@@ -12,8 +12,8 @@ export default function FollowButton({ isFollowing, onToggle }: FollowButtonProp
       onClick={onToggle}
       className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
         isFollowing
-          ? "border-zinc-900 bg-zinc-900 text-white hover:bg-zinc-700"
-          : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
+          ? "border-brand bg-brand text-white hover:bg-brand-dark"
+          : "border-zinc-300 bg-white text-zinc-700 hover:border-brand"
       }`}
     >
       {isFollowing ? "Following" : "+ Follow team"}

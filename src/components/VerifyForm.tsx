@@ -110,7 +110,7 @@ export default function VerifyForm({
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-zinc-700 disabled:bg-zinc-300"
+              className="flex-1 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark disabled:bg-zinc-300"
             >
               {submitting ? "Submitting..." : "Confirm check-in"}
             </button>

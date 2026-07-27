@@ -42,6 +42,10 @@ npm here also gates install scripts (see `allowScripts` in `package.json`) — a
 
 **Stack:** Next.js 16 (App Router, TypeScript, `src/` dir), Prisma 6 (pinned — Prisma 7 removed schema-file `datasource url` in favor of adapter config, which isn't worth the churn for this project's scale), Postgres, Tailwind v4 (CSS-first config, no `tailwind.config.ts`), Leaflet/`react-leaflet` for maps.
 
+### Branding
+
+Brand color tokens (`bg-brand`, `text-brand`, `border-brand`, `bg-brand-dark`, `bg-brand-cream`) are defined in `src/app/globals.css`'s `@theme inline` block — a terracotta (`#b5493c`) drawn from the HomeGame logo, with a darker hover shade and a cream accent. Used for primary CTAs, active tab/toggle states, selected-card borders, and nav-link hover — **not** for the ranking-tier badge colors (`src/lib/ranking.ts`) or the past/upcoming status badges, which are a deliberately separate semantic color system (green/amber/gray = hierarchy signal) and shouldn't be recolored to match brand chrome. `src/components/Logo.tsx` renders the icon+wordmark (used in every page header); `src/app/icon.svg` is the same mark as the site favicon (Next's file-convention icon, not `favicon.ico` — that file was removed in favor of this).
+
 ### Fan identity — the load-bearing concept
 
 There is no auth. A `Fan` is identified by a `deviceId` (UUID minted client-side into `localStorage` via `src/lib/deviceId.ts`, sent with every write). The **first** write from a given device creates the `Fan` row; each route that mutates fan-owned data (verifications, team follows, bar favorites) does its own `prisma.fan.upsert({ where: { deviceId }, ... })` inline — there's no shared helper for this yet, so keep the upsert shape consistent with the existing routes (`src/app/api/verifications/route.ts`, `src/app/api/follows/route.ts`, `src/app/api/favorites/route.ts`) when adding a new one.

@@ -5,6 +5,7 @@ import Link from "next/link";
 import WatchPartyTabs from "@/components/WatchPartyTabs";
 import WatchPartyCard from "@/components/WatchPartyCard";
 import WatchPartyForm from "@/components/WatchPartyForm";
+import Logo from "@/components/Logo";
 import type { BarDirectoryItemDTO, TeamDTO, WatchPartyListItemDTO } from "@/lib/types";
 
 export default function WatchPartiesPage() {
@@ -62,16 +63,21 @@ export default function WatchPartiesPage() {
     <div className="flex flex-1 flex-col bg-zinc-50">
       <header className="border-b border-zinc-200 bg-white px-6 py-4">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3">
-          <div>
-            <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-700">
-              &larr; Home
+          <div className="flex items-center gap-4">
+            <Link href="/">
+              <Logo />
             </Link>
-            <h1 className="text-xl font-bold text-zinc-900">Watch Parties</h1>
+            <div>
+              <Link href="/" className="text-sm text-zinc-500 hover:text-brand">
+                &larr; Home
+              </Link>
+              <h1 className="text-xl font-bold text-zinc-900">Watch Parties</h1>
+            </div>
           </div>
           <button
             type="button"
             onClick={() => setShowHostForm(true)}
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700"
+            className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
           >
             Host a watch party
           </button>

@@ -14,7 +14,7 @@ export default function WatchPartyTabs({ status, onChange }: WatchPartyTabsProps
           type="button"
           onClick={() => onChange(s)}
           className={`rounded-md px-4 py-1.5 text-sm font-medium capitalize transition-colors ${
-            status === s ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900"
+            status === s ? "bg-brand text-white" : "text-zinc-600 hover:text-brand"
           }`}
         >
           {s}

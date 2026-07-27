@@ -14,8 +14,8 @@ export default function RsvpButton({ isRsvpd, disabled, onToggle }: RsvpButtonPr
       disabled={disabled}
       className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 ${
         isRsvpd
-          ? "border border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400"
-          : "bg-zinc-900 text-white hover:bg-zinc-700"
+          ? "border border-zinc-300 bg-white text-zinc-700 hover:border-brand"
+          : "bg-brand text-white hover:bg-brand-dark"
       }`}
     >
       {isRsvpd ? "You're going — cancel RSVP" : "RSVP to this watch party"}
