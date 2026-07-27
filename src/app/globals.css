@@ -12,6 +12,8 @@
   --color-brand: #b5493c;
   --color-brand-dark: #963c31;
   --color-brand-cream: #fbf4ea;
+  --color-watch: #2563eb;
+  --color-watch-dark: #1d4ed8;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

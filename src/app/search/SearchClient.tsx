@@ -7,6 +7,7 @@ import BarList from "@/components/BarList";
 import VerifyForm from "@/components/VerifyForm";
 import FollowButton from "@/components/FollowButton";
 import Logo from "@/components/Logo";
+import WatchPartyModal from "@/components/WatchPartyModal";
 import { getDeviceId } from "@/lib/deviceId";
 import type { RankedBarDTO, TeamDTO } from "@/lib/types";
 
@@ -29,6 +30,7 @@ export default function SearchClient({ teamId, city }: SearchClientProps) {
   const [bars, setBars] = useState<RankedBarDTO[] | null>(null);
   const [selectedBarId, setSelectedBarId] = useState<string | null>(null);
   const [verifyingBar, setVerifyingBar] = useState<RankedBarDTO | null>(null);
+  const [watchPartyBar, setWatchPartyBar] = useState<RankedBarDTO | null>(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [favoritedBarIds, setFavoritedBarIds] = useState<Set<string>>(new Set());
 
@@ -143,12 +145,6 @@ export default function SearchClient({ teamId, city }: SearchClientProps) {
             >
               My Profile
             </Link>
-            <Link
-              href="/watch-parties"
-              className="text-sm text-zinc-500 hover:text-brand"
-            >
-              Watch Parties
-            </Link>
           </div>
         </div>
       </header>
@@ -165,6 +161,7 @@ export default function SearchClient({ teamId, city }: SearchClientProps) {
               onSelect={setSelectedBarId}
               onVerify={setVerifyingBar}
               onToggleFavorite={toggleFavorite}
+              onOpenWatchParties={setWatchPartyBar}
             />
           )}
         </div>
@@ -188,6 +185,17 @@ export default function SearchClient({ teamId, city }: SearchClientProps) {
             setVerifyingBar(null);
             loadBars();
           }}
+        />
+      )}
+
+      {watchPartyBar && team && (
+        <WatchPartyModal
+          teamId={teamId}
+          barId={watchPartyBar.id}
+          teamName={team.name}
+          barName={watchPartyBar.name}
+          onClose={() => setWatchPartyBar(null)}
+          onChanged={loadBars}
         />
       )}
     </div>

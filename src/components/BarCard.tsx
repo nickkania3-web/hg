@@ -1,12 +1,13 @@
 "use client";
 
 import { getTierInfo } from "@/lib/ranking";
+import WatchPartyIndicator from "@/components/WatchPartyIndicator";
 import type { RankedBarDTO, TeamBarEntryDTO } from "@/lib/types";
 
 // Accepts either a single-team RankedBarDTO (used by /search) or a
 // multi-team TeamBarEntryDTO (used by the main page) — teamId/teamName are
 // only present in the latter, and drive the optional team label + which
-// team a verification gets attributed to.
+// team a verification/watch-party gets attributed to.
 export type BarCardEntry = RankedBarDTO &
   Partial<Pick<TeamBarEntryDTO, "teamId" | "teamName" | "sport">>;
 
@@ -17,6 +18,7 @@ interface BarCardProps {
   onSelect: (barId: string) => void;
   onVerify: (bar: BarCardEntry) => void;
   onToggleFavorite: (barId: string) => void;
+  onOpenWatchParties: (bar: BarCardEntry) => void;
 }
 
 export default function BarCard({
@@ -26,17 +28,22 @@ export default function BarCard({
   onSelect,
   onVerify,
   onToggleFavorite,
+  onOpenWatchParties,
 }: BarCardProps) {
   const tier = getTierInfo(bar.verificationCount);
+  const hasUpcomingWatchParty = bar.upcomingWatchPartyCount > 0;
+
+  let borderClass = "border-zinc-200 hover:border-zinc-400";
+  if (isSelected) {
+    borderClass = "border-brand ring-1 ring-brand";
+  } else if (hasUpcomingWatchParty) {
+    borderClass = "border-watch ring-1 ring-watch";
+  }
 
   return (
     <div
       onClick={() => onSelect(bar.id)}
-      className={`cursor-pointer rounded-xl border bg-white p-4 shadow-sm transition-colors ${
-        isSelected
-          ? "border-brand ring-1 ring-brand"
-          : "border-zinc-200 hover:border-zinc-400"
-      }`}
+      className={`cursor-pointer rounded-xl border bg-white p-4 shadow-sm transition-colors ${borderClass}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -76,21 +83,28 @@ export default function BarCard({
         {bar.soundPolicy && <span>{bar.soundPolicy}</span>}
       </div>
 
-      <div className="mt-3 flex items-center justify-between">
+      <div className="mt-3 flex items-center justify-between gap-3">
         <span className="text-sm text-zinc-500">
           {bar.verificationCount}{" "}
           {bar.verificationCount === 1 ? "fan check-in" : "fan check-ins"}
         </span>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onVerify(bar);
-          }}
-          className="rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-dark"
-        >
-          I watched here
-        </button>
+        <div className="flex items-center gap-3">
+          <WatchPartyIndicator
+            upcomingCount={bar.upcomingWatchPartyCount}
+            pastCount={bar.pastWatchPartyCount}
+            onClick={() => onOpenWatchParties(bar)}
+          />
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onVerify(bar);
+            }}
+            className="shrink-0 rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-dark"
+          >
+            I watched here
+          </button>
+        </div>
       </div>
     </div>
   );

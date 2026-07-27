@@ -293,6 +293,19 @@ const watchParties: WatchPartySeed[] = [
     rsvpFanIndices: [1, 2, 3, 4, 5, 6, 7],
   },
   {
+    // Second upcoming party at the same team+bar as above, so the bar
+    // card's indicator exercises the plural "2 watch parties scheduled"
+    // case rather than always showing "1".
+    teamName: "Michigan State Spartans",
+    sport: "Football",
+    barKey: "kirkwood",
+    daysOffset: 17,
+    hour: 15,
+    note: "vs Ohio State, watch party #2",
+    hostFanIndex: 9,
+    rsvpFanIndices: [10, 11],
+  },
+  {
     teamName: "Notre Dame Fighting Irish",
     sport: "Football",
     barKey: "irishoak",

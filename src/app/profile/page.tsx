@@ -48,12 +48,6 @@ export default function ProfilePage() {
             >
               Timeline
             </Link>
-            <Link
-              href="/watch-parties"
-              className="text-sm text-zinc-500 hover:text-brand"
-            >
-              Watch Parties
-            </Link>
           </div>
         </div>
       </header>

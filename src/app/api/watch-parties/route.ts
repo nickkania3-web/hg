@@ -1,43 +1,5 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import type { WatchPartyListItemDTO } from "@/lib/types";
-
-export async function GET(request: NextRequest) {
-  const city = request.nextUrl.searchParams.get("city");
-  const status = request.nextUrl.searchParams.get("status") === "past" ? "past" : "upcoming";
-
-  if (!city) {
-    return Response.json({ error: "city is required" }, { status: 400 });
-  }
-
-  const now = new Date();
-
-  const parties = await prisma.watchParty.findMany({
-    where: {
-      city: { equals: city, mode: "insensitive" },
-      dateTime: status === "upcoming" ? { gte: now } : { lt: now },
-    },
-    include: {
-      team: { select: { name: true, sport: true } },
-      bar: { select: { name: true } },
-      _count: { select: { rsvps: true } },
-    },
-    orderBy: { dateTime: status === "upcoming" ? "asc" : "desc" },
-  });
-
-  const dto: WatchPartyListItemDTO[] = parties.map((p) => ({
-    id: p.id,
-    teamName: p.team.name,
-    sport: p.team.sport,
-    barName: p.bar.name,
-    city: p.city,
-    dateTime: p.dateTime.toISOString(),
-    rsvpCount: p._count.rsvps,
-    isPast: p.dateTime < now,
-  }));
-
-  return Response.json(dto);
-}
 
 interface CreateWatchPartyBody {
   deviceId?: string;

@@ -8,6 +8,7 @@ import TeamMultiSelect from "@/components/TeamMultiSelect";
 import SelectedTeamsStrip from "@/components/SelectedTeamsStrip";
 import BarList from "@/components/BarList";
 import VerifyForm from "@/components/VerifyForm";
+import WatchPartyModal from "@/components/WatchPartyModal";
 import type { BarCardEntry } from "@/components/BarCard";
 import { getDeviceId } from "@/lib/deviceId";
 import type { TeamBarEntryDTO, TeamDTO } from "@/lib/types";
@@ -28,6 +29,7 @@ export default function Home() {
   const [entries, setEntries] = useState<TeamBarEntryDTO[] | null>(null);
   const [selectedBarId, setSelectedBarId] = useState<string | null>(null);
   const [verifyingEntry, setVerifyingEntry] = useState<BarCardEntry | null>(null);
+  const [watchPartyEntry, setWatchPartyEntry] = useState<BarCardEntry | null>(null);
   const [favoritedBarIds, setFavoritedBarIds] = useState<Set<string>>(new Set());
 
   const teamIdsKey = Array.from(selectedTeamIds).sort().join(",");
@@ -141,9 +143,6 @@ export default function Home() {
             <Link href="/profile" className="text-zinc-500 hover:text-brand">
               My Profile
             </Link>
-            <Link href="/watch-parties" className="text-zinc-500 hover:text-brand">
-              Watch Parties
-            </Link>
           </div>
         </div>
       </header>
@@ -192,6 +191,7 @@ export default function Home() {
                   onSelect={setSelectedBarId}
                   onVerify={setVerifyingEntry}
                   onToggleFavorite={toggleFavorite}
+                  onOpenWatchParties={setWatchPartyEntry}
                   emptyMessage="No verified fan spots yet for your selected teams in this city. Be the first to check in."
                 />
               )}
@@ -218,6 +218,17 @@ export default function Home() {
             setVerifyingEntry(null);
             loadEntries();
           }}
+        />
+      )}
+
+      {watchPartyEntry && watchPartyEntry.teamId && watchPartyEntry.teamName && (
+        <WatchPartyModal
+          teamId={watchPartyEntry.teamId}
+          barId={watchPartyEntry.id}
+          teamName={watchPartyEntry.teamName}
+          barName={watchPartyEntry.name}
+          onClose={() => setWatchPartyEntry(null)}
+          onChanged={loadEntries}
         />
       )}
     </div>

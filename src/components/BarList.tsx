@@ -9,6 +9,7 @@ interface BarListProps {
   onSelect: (barId: string) => void;
   onVerify: (bar: BarCardEntry) => void;
   onToggleFavorite: (barId: string) => void;
+  onOpenWatchParties: (bar: BarCardEntry) => void;
   emptyMessage?: string;
 }
 
@@ -19,6 +20,7 @@ export default function BarList({
   onSelect,
   onVerify,
   onToggleFavorite,
+  onOpenWatchParties,
   emptyMessage = "No verified fan spots yet for this team in this city. Be the first to check in.",
 }: BarListProps) {
   if (bars.length === 0) {
@@ -40,6 +42,7 @@ export default function BarList({
           onSelect={onSelect}
           onVerify={onVerify}
           onToggleFavorite={onToggleFavorite}
+          onOpenWatchParties={onOpenWatchParties}
         />
       ))}
     </div>
